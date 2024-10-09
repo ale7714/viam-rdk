@@ -430,3 +430,5 @@ require (
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e
 )
+
+replace github.com/smarty/assertions => github.com/ale7714/smarty-assertions v0.0.0-20241009164434-fb53e627b112 // shouldnotequal
