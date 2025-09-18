@@ -69,5 +69,5 @@ jobs:
         header: motion-benchmark
         number: ${{ inputs.pr_number }}
         recreate: true
-        path: motion-benchmarks.md
+        path: motion-testing/results/motion-benchmarks.md
 
