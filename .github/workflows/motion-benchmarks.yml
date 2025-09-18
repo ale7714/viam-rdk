@@ -2,6 +2,9 @@ name: Motion Benchmarks
 
 on:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        type: string
   workflow_call:
     inputs:
       pr_number:
