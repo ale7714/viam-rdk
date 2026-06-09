@@ -43,7 +43,7 @@ jobs:
       extra_prompt: |
         - Run only the verification commands relevant to the files you changed: `make lint-go` and `make test-go`.
         - Do NOT run unrelated linters or test suites — they waste turns and time.
-        - If a test or lint command fails more than twice on the same issue, commit what you have, push, and note the unresolved issue in a PR comment. Include a link to this workflow run so reviewers can read the Claude output log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        - If a test or lint command fails more than twice on the same issue, commit what you have, push, and note the unresolved issue in a PR comment.
         - For Go test failures: read the failing test AND the function under test before making changes. Understand the data flow and what the test asserts, not just the error message.
         - Before editing code, read 1-2 similar functions or tests in the same file to understand existing patterns and conventions.
       extra_system_prompt: >-
