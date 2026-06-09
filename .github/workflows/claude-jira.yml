@@ -75,6 +75,7 @@ jobs:
       extra_prompt: |
         - Run `make lint-go` and `make test-go` to verify your changes before committing. Fix any errors.
         - If a test or lint command fails more than twice on the same issue, commit what you have, create the PR, and note the unresolved issue in the PR description.
+        - In the PR description, include a link to the workflow run that produced this PR so reviewers can read the Claude output log: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         - Add the `safe to test` label to the PR after creation so CI can run: `gh pr edit <number> --add-label "safe to test"`.
       extra_system_prompt: >-
         This is a Go project (go.viam.com/rdk).
