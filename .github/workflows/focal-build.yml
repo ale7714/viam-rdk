@@ -39,9 +39,19 @@ jobs:
           - arch: ubuntu-large
             image: ghcr.io/viamrobotics/rdk-focal:amd64-cache
             platform: linux/amd64
+            uname_m: x86_64
+            compress: true
           - arch: ubuntu-large-arm
             image: ghcr.io/viamrobotics/rdk-focal:arm64-cache
             platform: linux/arm64
+            uname_m: aarch64
+            compress: true
+          # armhf: raw (uncompressed) binary to unblock 32-bit testing.
+          - arch: ubuntu-small-arm
+            image: ghcr.io/viamrobotics/rdk-focal:armhf-cache
+            platform: linux/arm/v7
+            uname_m: armv7l
+            compress: false
     runs-on: ${{ matrix.arch }}
     container:
       image: ${{ matrix.image }}
@@ -67,6 +77,7 @@ jobs:
       run: chown -R testbot:testbot .
 
     - name: Install upx
+      if: ${{ matrix.compress }}
       # crazy-max/ghaction-upx@v4.0.0
       uses: crazy-max/ghaction-upx@c83f378efc804f828e988debb88ed6116feb2368
       with:
@@ -74,6 +85,7 @@ jobs:
         install-only: true
 
     - name: Link upx into /usr/local/bin
+      if: ${{ matrix.compress }}
       run: ln -sf "$(command -v upx)" /usr/local/bin/upx
 
     - name: Resolve channel and arch
@@ -90,11 +102,26 @@ jobs:
             echo "channel=focal" >> "$GITHUB_OUTPUT"
             echo "publish=false" >> "$GITHUB_OUTPUT" ;;
         esac
-        echo "arch=$(uname -m)" >> "$GITHUB_OUTPUT"
+        echo "arch=${{ matrix.uname_m }}" >> "$GITHUB_OUTPUT"
 
-    - name: Build viam-server-${{ steps.meta.outputs.channel }}
+    - name: Build viam-server-${{ steps.meta.outputs.channel }} (compressed)
+      if: ${{ matrix.compress }}
       run: |
         sudo -Hu testbot bash -lc 'make BUILD_CHANNEL=${{ steps.meta.outputs.channel }} static-release'
+
+    # armhf: build the raw semi-static binary and stage it under the channel name,
+    # skipping upx (no 32-bit-arm upx wired up yet). `find` locates the output because
+    # `uname -m` can report the host (aarch64) inside a 32-bit arm container.
+    - name: Build viam-server-${{ steps.meta.outputs.channel }} (raw, no upx)
+      if: ${{ !matrix.compress }}
+      run: |
+        sudo -Hu testbot bash -lc '
+          set -euxo pipefail
+          make BUILD_CHANNEL=${{ steps.meta.outputs.channel }} server-static
+          bin=$(find bin -type f -name viam-server-static | head -1)
+          mkdir -p etc/packaging/static/deploy
+          cp "$bin" "etc/packaging/static/deploy/viam-server-${{ steps.meta.outputs.channel }}-${{ matrix.uname_m }}"
+        '
 
     - name: Boot smoke test
       run: |
